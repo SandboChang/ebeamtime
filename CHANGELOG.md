@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.1.1 - 2026-07-18
+## 0.1.2rc1 - 2026-07-18
+
+- Add concise first-time CUDA setup and backend-selection instructions.
+- Keep GPU code examples collapsed by default on GitHub and PyPI.
+- Show example write times in both seconds and hours.
+
+## 0.1.1 - 2026-07-18 (TestPyPI only)
 
 - Replace the project page with concise, commented single-layer and
   multiple-layer examples.
