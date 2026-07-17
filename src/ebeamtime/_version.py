@@ -31,4 +31,4 @@ def _installed_distribution_version(distribution_name: str, fallback: str) -> st
     return fallback
 
 
-__version__ = _installed_distribution_version("ebeamtime", "0.1.0.dev0")
+__version__ = _installed_distribution_version("ebeamtime", "0.1.0rc1")

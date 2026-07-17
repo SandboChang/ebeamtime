@@ -2,8 +2,9 @@
 
 Qualified on 2026-07-17 under Windows 11 WSL, Linux x86_64, CPython 3.14:
 
-- CUDA-enabled standalone suite: 41 passed with no skips or failures;
-- CPU-only standalone suite: 40 passed with one expected CUDA capability skip;
+- RC1 CUDA-enabled standalone suite: 47 passed with one expected Apple Metal
+  hardware skip and no failures;
+- CPU-only behavior remains covered without requiring CUDA compilation;
 - all 17 legacy `scgds.ebeamtime` root exports and signatures preserved after
   namespace and development-version normalization; 21 root exports total;
 - CLI help byte-for-byte equal to the extraction baseline;
@@ -28,6 +29,10 @@ Qualified on 2026-07-17 under Windows 11 WSL, Linux x86_64, CPython 3.14:
 - clean external virtual environment installed locally built `gdsdiff` and
   `ebeamtime` wheels, passed `pip check`, root imports, CLI help, diagnostics,
   and the unit formula without either source checkout on `sys.path`.
+- clean wheel and sdist installations passed with both `uv` and ordinary `pip`;
+  installed artifacts passed explicit cold/warm CUDA preparation, CPU/CUDA area
+  parity, packaged-schema validation, and the overlapping-rectangle `0.2 s`
+  reference calculation.
 
 Real Apple Metal validation remains outstanding and is nonblocking for the
-private extraction milestone.
+Linux/WSL CUDA-qualified `0.1.0` release line.

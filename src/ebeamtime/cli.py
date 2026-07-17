@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from ._version import __version__
 from .api import estimate_gds_write_time
 from .config import EstimateConfig, LayerSpec, exposures_from_cli, load_project_estimate_config
 from .report import days_from_seconds, hours_from_seconds
@@ -15,8 +16,9 @@ def build_parser() -> argparse.ArgumentParser:
         prog="ebeamtime",
         description="Estimate analytical ebeam write time from GDS area, dose, and beam current.",
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("gds", type=Path)
-    parser.add_argument("--project-config", type=Path, help="Python project config defining ebeamtime_layer_exposures.")
+    parser.add_argument("--project-config", type=Path, help="Trusted Python project config defining ebeamtime_layer_exposures; loading executes the file.")
     parser.add_argument("--top")
     parser.add_argument("--exposure", action="append", default=[], metavar="L:D:DOSE_UC_CM2:CURRENT_NA")
     parser.add_argument("--writefield-indicator-layer", help="Layer spec L:D, or config variable name when --project-config is used.")

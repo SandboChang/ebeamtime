@@ -10,6 +10,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable, Iterable, Iterator
 
+from gdsdiff import native_build_fingerprint
+
 ENV_NATIVE_CACHE_DIR = "EBEAMTIME_NATIVE_CACHE_DIR"
 LEGACY_ENV_NATIVE_CACHE_DIR = "SCGDS_EBEAMTIME_NATIVE_CACHE_DIR"
 
@@ -25,7 +27,7 @@ def content_addressed_library_path(
     build_key: Iterable[str] = (),
 ) -> Path:
     digest = hashlib.sha256(b"ebeamtime-native-cache-v1\0")
-    for item in build_key:
+    for item in native_build_fingerprint(tuple(build_key)):
         digest.update(str(item).encode("utf-8"))
         digest.update(b"\0")
     for source in (Path(item) for item in sources):
@@ -51,7 +53,7 @@ def ensure_cached_native_library(
     path = content_addressed_library_path(filename, sources=source_paths, build_key=build_key)
     if path.is_file():
         return path
-    path.parent.mkdir(parents=True, exist_ok=True)
+    _ensure_private_cache_directory(path.parent)
     lock_path = path.with_name(f".{path.name}.lock")
     with _exclusive_cache_lock(lock_path):
         if path.is_file():
@@ -82,6 +84,19 @@ def native_cache_dir() -> Path:
         base = Path(root).expanduser() if root else Path.home() / ".cache"
         base = base / "ebeamtime" / "native"
     return base / _platform_tag()
+
+
+def _ensure_private_cache_directory(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True, mode=0o700)
+    if os.name == "nt":
+        return
+    if path.is_symlink():
+        raise PermissionError(f"native cache directory must not be a symbolic link: {path}")
+    stat = path.stat()
+    if hasattr(os, "getuid") and stat.st_uid != os.getuid():
+        raise PermissionError(f"native cache directory is not owned by the current user: {path}")
+    if stat.st_mode & 0o077:
+        path.chmod(stat.st_mode & ~0o077)
 
 
 def _platform_tag() -> str:

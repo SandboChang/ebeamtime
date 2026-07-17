@@ -10,11 +10,12 @@ python -m pip install ebeamtime
 ebeamtime layout.gds --exposure 1:0:100:1 --backend cpu
 ```
 
-For local development before the packages are released, install sibling
-checkouts explicitly without putting local paths in package metadata:
+For local development before `gdsdiff` is available from the selected package
+index, install sibling checkouts explicitly without putting paths in metadata:
 
 ```bash
-python -m pip install -e ../gdsdiff -e ".[test]"
+UV_LINK_MODE=copy uv pip install --python .venv_wsl/bin/python -e ../gdsdiff -e ".[dev]"
+TMPDIR=/tmp .venv_wsl/bin/python -m pytest
 ```
 
 Python usage:
@@ -40,5 +41,16 @@ and emits native SASS without PTX. For cross-machine builds, set
 `EBEAMTIME_CUDA_ARCHITECTURES` to comma-separated compute capabilities without
 decimals (for example, `89,120`); targets and standard `NVCC_*_FLAGS` become
 part of the content-addressed cache key.
+
+Installation and import never compile GPU code. Inspect the shared CUDA
+toolchain through `ebeamtime.inspect_cuda_toolchain()`, then build and verify
+only the estimator kernel with `ebeamtime.prepare_cuda()` or
+`ebeamtime-prepare-cuda --json`. Explicit `backend="cuda"` use retains lazy
+preparation. `backend="auto"` does not probe or compile a GPU backend for
+workloads below `gpu_min_polygons`. Metal is experimental until validated on
+Apple Silicon hardware.
+
+`--project-config` loads and executes Python. Use it only with trusted project
+configuration files.
 
 The project is pre-release software and is licensed under GPL-3.0-only.

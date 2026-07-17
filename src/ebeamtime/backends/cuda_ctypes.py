@@ -9,8 +9,8 @@ from time import perf_counter
 
 import numpy as np
 
-from ..native import nvcc_architecture_flags
-from ..native_cache import ensure_cached_native_library
+from ..native import nvcc_architecture_flags, resolve_nvcc_path
+from ..native_cache import content_addressed_library_path, ensure_cached_native_library, native_cache_dir
 from .base import AreaAggregation
 
 
@@ -90,23 +90,12 @@ def run_cuda_area_aggregation(buffer, exposure_ids: np.ndarray, exposure_count: 
 @lru_cache(maxsize=1)
 def _load_library() -> ctypes.CDLL:
     source = _source_path()
-    architecture_flags = nvcc_architecture_flags()
     if not source.exists():
         raise CudaCtypesUnavailable(f"CUDA source not found: {source}")
     path = ensure_cached_native_library(
         "_ebeamtime_cuda_area.so",
         sources=(source,),
-        build_key=(
-            "nvcc",
-            "-O3",
-            "-std=c++17",
-            "--shared",
-            "-Xcompiler",
-            "-fPIC",
-            *architecture_flags,
-            f"NVCC_PREPEND_FLAGS={os.environ.get('NVCC_PREPEND_FLAGS', '')}",
-            f"NVCC_APPEND_FLAGS={os.environ.get('NVCC_APPEND_FLAGS', '')}",
-        ),
+        build_key=_cuda_build_key(),
         builder=_build_library,
     )
     try:
@@ -138,8 +127,11 @@ def _build_library(path: Path) -> None:
     source = _source_path()
     architecture_flags = nvcc_architecture_flags()
     path.parent.mkdir(parents=True, exist_ok=True)
+    nvcc = resolve_nvcc_path()
+    if nvcc is None:
+        raise CudaCtypesUnavailable("nvcc is not available; install the CUDA toolkit or set CUDA_HOME")
     command = [
-        "nvcc",
+        nvcc,
         "-O3",
         "-std=c++17",
         "--shared",
@@ -156,6 +148,35 @@ def _build_library(path: Path) -> None:
         raise CudaCtypesUnavailable("nvcc is not available") from exc
     if completed.returncode != 0:
         raise CudaCtypesUnavailable((completed.stderr or completed.stdout).strip() or "nvcc failed")
+
+
+def prepared_cuda_library_path() -> Path:
+    """Return the current toolchain/device cache target without building it."""
+
+    return _prepared_cuda_library_path_cached(_cuda_build_key(), str(native_cache_dir()))
+
+
+@lru_cache(maxsize=16)
+def _prepared_cuda_library_path_cached(
+    build_key: tuple[str, ...], cache_directory: str
+) -> Path:
+    return content_addressed_library_path(
+        "_ebeamtime_cuda_area.so", sources=(_source_path(),), build_key=build_key
+    )
+
+
+def _cuda_build_key() -> tuple[str, ...]:
+    return (
+        resolve_nvcc_path() or "nvcc",
+        "-O3",
+        "-std=c++17",
+        "--shared",
+        "-Xcompiler",
+        "-fPIC",
+        *nvcc_architecture_flags(),
+        f"NVCC_PREPEND_FLAGS={os.environ.get('NVCC_PREPEND_FLAGS', '')}",
+        f"NVCC_APPEND_FLAGS={os.environ.get('NVCC_APPEND_FLAGS', '')}",
+    )
 
 
 def _source_path() -> Path:

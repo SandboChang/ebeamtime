@@ -59,3 +59,21 @@ def test_cuda_backend_matches_cpu_when_available(tmp_path):
     assert cuda.backend["name"] == "cuda"
     assert cuda.layers[0].area_um2 == pytest.approx(cpu.layers[0].area_um2)
     assert cuda.total_beam_on_s == pytest.approx(cpu.total_beam_on_s)
+
+
+def test_experimental_metal_backend_matches_cpu_when_available(tmp_path):
+    if not discover_native_capabilities().metal_available:
+        pytest.skip("Metal ebeamtime backend requires prepared Apple Silicon hardware")
+    cell = gdstk.Cell("top")
+    for index in range(32):
+        cell.add(gdstk.rectangle((index * 2, 0), (index * 2 + 1, 3), layer=1, datatype=0))
+    lib = gdstk.Library(unit=1e-6, precision=1e-9)
+    lib.add(cell)
+    path = tmp_path / "metal.gds"
+    lib.write_gds(str(path))
+    exposures = (EbeamLayerExposure("ld_rod", LayerSpec(1, 0), 100, 1),)
+    cpu = estimate_gds_write_time(EstimateConfig(path, exposures, backend="cpu")).report
+    metal = estimate_gds_write_time(EstimateConfig(path, exposures, backend="metal")).report
+    assert metal.backend["name"] == "metal"
+    assert metal.layers[0].area_um2 == pytest.approx(cpu.layers[0].area_um2)
+    assert metal.total_beam_on_s == pytest.approx(cpu.total_beam_on_s)

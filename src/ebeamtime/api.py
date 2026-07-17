@@ -145,8 +145,10 @@ def _select_backend(config: EstimateConfig, polygon_count: int):
 
         return MetalAreaBackend()
 
-    capabilities = discover_native_capabilities()
     use_gpu_for_size = polygon_count >= config.gpu_min_polygons or config.require_gpu
+    if not use_gpu_for_size:
+        return CpuAreaBackend()
+    capabilities = discover_native_capabilities()
     if use_gpu_for_size and capabilities.cuda_available:
         from .backends.cuda import CudaAreaBackend
 
@@ -156,6 +158,14 @@ def _select_backend(config: EstimateConfig, polygon_count: int):
 
         return MetalAreaBackend()
     if config.require_gpu:
+        if capabilities.nvcc_available:
+            from .backends.cuda import CudaAreaBackend
+
+            return CudaAreaBackend()
+        if capabilities.xcrun_available:
+            from .backends.metal import MetalAreaBackend
+
+            return MetalAreaBackend()
         raise RuntimeError("GPU backend is required but no CUDA or Metal backend is available")
     backend = CpuAreaBackend()
     if requested == Backend.AUTO:

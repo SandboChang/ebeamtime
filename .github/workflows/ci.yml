@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: 0.11.29
+  GDSDIFF_CANDIDATE: 0.1.0rc1
+
+jobs:
+  test:
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.14"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv venv --python ${{ matrix.python-version }} .venv
+      - run: uv pip install --python .venv --index-url https://pypi.org/simple gdstk numpy jsonschema pytest
+      - run: uv pip install --python .venv --index-url https://test.pypi.org/simple --no-deps "gdsdiff==${{ env.GDSDIFF_CANDIDATE }}"
+      - run: uv pip install --python .venv --no-deps -e .
+      - run: uv run --no-sync python -m pytest
+
+  package:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: uv build --no-sources
+      - run: uvx --from twine==6.2.0 twine check --strict dist/*
+      - name: Smoke-test installed wheel
+        shell: bash
+        run: |
+          uv venv --python 3.14 /tmp/ebeamtime-wheel-smoke
+          uv pip install --python /tmp/ebeamtime-wheel-smoke/bin/python --index-url https://pypi.org/simple gdstk numpy jsonschema
+          uv pip install --python /tmp/ebeamtime-wheel-smoke/bin/python --index-url https://test.pypi.org/simple --no-deps "gdsdiff==$GDSDIFF_CANDIDATE"
+          uv pip install --python /tmp/ebeamtime-wheel-smoke/bin/python --no-deps dist/*.whl
+          cd /tmp
+          /tmp/ebeamtime-wheel-smoke/bin/python "$GITHUB_WORKSPACE/scripts/installed_smoke.py"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ebeamtime-distributions
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14

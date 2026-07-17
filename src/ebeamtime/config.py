@@ -90,6 +90,8 @@ class EstimateConfig:
     def __post_init__(self) -> None:
         object.__setattr__(self, "gds_path", Path(self.gds_path))
         object.__setattr__(self, "backend", Backend.coerce(self.backend))
+        if self.backend == Backend.CPU and self.require_gpu:
+            raise ValueError("backend='cpu' conflicts with require_gpu=True")
         exposures = tuple(self.exposures)
         if not exposures:
             raise ValueError("at least one ebeam exposure layer is required")

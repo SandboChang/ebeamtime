@@ -4,12 +4,14 @@ import importlib
 import json
 import math
 import sys
+from importlib.resources import files
 from importlib.metadata import version
 from types import ModuleType
 
 import gdstk
 import numpy as np
 import pytest
+import jsonschema
 
 import ebeamtime.api as api_module
 from ebeamtime import (
@@ -161,6 +163,9 @@ def test_report_schema_and_cpu_safe_diagnostics(tmp_path):
     path = _write(tmp_path / "report.gds", cell)
     report = estimate_gds_write_time(EstimateConfig(path, _exposure(), backend="cpu")).report.to_json_dict()
     validate_report_dict(report)
+    schema = json.loads(files("ebeamtime").joinpath("schemas/ebeamtime-report-v1.schema.json").read_text(encoding="utf-8"))
+    jsonschema.Draft202012Validator.check_schema(schema)
+    jsonschema.validate(report, schema)
     assert report["schema_version"] == "ebeamtime-report-v1"
     diagnostics = backend_diagnostics()
     assert diagnostics["capabilities"]["cpu_available"] is True
@@ -169,3 +174,21 @@ def test_report_schema_and_cpu_safe_diagnostics(tmp_path):
 
 def test_report_version_matches_installed_distribution():
     assert __version__ == version("ebeamtime")
+
+
+def test_cpu_backend_cannot_claim_gpu_requirement():
+    with pytest.raises(ValueError, match="conflicts"):
+        EstimateConfig("dummy.gds", _exposure(), backend="cpu", require_gpu=True)
+
+
+def test_small_auto_workload_does_not_probe_native_backends(tmp_path, monkeypatch):
+    cell = gdstk.Cell("top")
+    cell.add(gdstk.rectangle((0, 0), (10, 10), layer=1))
+    path = _write(tmp_path / "small-auto.gds", cell)
+
+    def unexpected_probe():
+        raise AssertionError("small AUTO workload must not probe or compile native backends")
+
+    monkeypatch.setattr(api_module, "discover_native_capabilities", unexpected_probe)
+    result = estimate_gds_write_time(EstimateConfig(path, _exposure(), backend="auto", gpu_min_polygons=2))
+    assert result.report.backend["name"] == "cpu"

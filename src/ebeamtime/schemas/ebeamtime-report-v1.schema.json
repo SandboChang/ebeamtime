@@ -5,7 +5,10 @@
   "type": "object",
   "required": [
     "tool", "schema_version", "tool_version", "path", "top_name", "backend",
-    "layers", "stage", "extraction", "timings", "total_s"
+    "beam_voltage_kV", "notes", "total_beam_on_s", "total_beam_on_hr",
+    "total_beam_on_days", "total_stage_s", "total_stage_hr",
+    "total_stage_days", "total_s", "total_hr", "total_days", "layers",
+    "stage", "extraction", "timings"
   ],
   "properties": {
     "tool": {"const": "ebeamtime"},
@@ -14,10 +17,49 @@
     "path": {"type": "string"},
     "top_name": {"type": "string"},
     "backend": {"type": "object"},
-    "layers": {"type": "array"},
+    "beam_voltage_kV": {"type": ["number", "null"], "exclusiveMinimum": 0},
+    "notes": {"type": "string"},
+    "total_beam_on_s": {"type": "number", "minimum": 0},
+    "total_beam_on_hr": {"type": "number", "minimum": 0},
+    "total_beam_on_days": {"type": "number", "minimum": 0},
+    "total_stage_s": {"type": "number", "minimum": 0},
+    "total_stage_hr": {"type": "number", "minimum": 0},
+    "total_stage_days": {"type": "number", "minimum": 0},
+    "total_s": {"type": "number", "minimum": 0},
+    "total_hr": {"type": "number", "minimum": 0},
+    "total_days": {"type": "number", "minimum": 0},
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "config_name", "layer", "polygon_count", "area_um2",
+          "dose_uC_cm2", "beam_current_nA", "beam_on_s", "beam_on_hr",
+          "beam_on_days"
+        ],
+        "properties": {
+          "config_name": {"type": "string", "minLength": 1},
+          "layer": {
+            "type": "object",
+            "required": ["layer", "datatype"],
+            "properties": {
+              "layer": {"type": "integer", "minimum": 0},
+              "datatype": {"type": "integer", "minimum": 0}
+            }
+          },
+          "polygon_count": {"type": "integer", "minimum": 0},
+          "area_um2": {"type": "number", "minimum": 0},
+          "dose_uC_cm2": {"type": "number", "exclusiveMinimum": 0},
+          "beam_current_nA": {"type": "number", "exclusiveMinimum": 0},
+          "beam_on_s": {"type": "number", "minimum": 0},
+          "beam_on_hr": {"type": "number", "minimum": 0},
+          "beam_on_days": {"type": "number", "minimum": 0}
+        }
+      }
+    },
     "stage": {"type": "object"},
     "extraction": {"type": "object"},
-    "timings": {"type": "object"},
-    "total_s": {"type": "number"}
+    "timings": {"type": "object"}
   }
 }

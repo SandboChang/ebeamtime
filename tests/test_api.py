@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 import textwrap
+from importlib.metadata import version
 
 import gdstk
 import pytest
@@ -175,6 +176,14 @@ def test_cli_table_and_json_report(tmp_path):
     assert report["total_beam_on_hr"] == pytest.approx(report["total_beam_on_s"] / 3600)
     assert report["total_stage_days"] == pytest.approx(report["total_stage_s"] / 86400)
     assert report["timings"]["total_hr"] == pytest.approx(report["timings"]["total_s"] / 3600)
+
+
+def test_cli_version_matches_distribution():
+    completed = subprocess.run(
+        [sys.executable, "-m", "ebeamtime", "--version"], check=False, text=True, capture_output=True
+    )
+    assert completed.returncode == 0
+    assert completed.stdout.strip() == f"ebeamtime {version('ebeamtime')}"
 
 
 def test_backend_auto_falls_back_to_cpu_for_small_layout(tmp_path, monkeypatch):

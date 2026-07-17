@@ -49,11 +49,13 @@ class NativeCapabilities:
 
 
 def discover_native_capabilities() -> NativeCapabilities:
+    """Inspect prepared backends without compiling or loading native code."""
+
     return NativeCapabilities(
         tool_version=TOOL_VERSION,
         cuda_ctypes_available=_cuda_ctypes_available(),
         metal_ctypes_available=_metal_ctypes_available(),
-        nvcc_available=_which_tool("nvcc", os.environ.get("PATH")) is not None,
+        nvcc_available=resolve_nvcc_path() is not None,
         xcrun_available=_which_tool("xcrun", os.environ.get("PATH")) is not None,
         cuda_architectures=_cuda_architectures_from_env(),
         cuda_compile_flags=nvcc_architecture_flags(),
@@ -61,12 +63,9 @@ def discover_native_capabilities() -> NativeCapabilities:
 
 
 def _cuda_ctypes_available() -> bool:
-    try:
-        from .backends.cuda_ctypes import cuda_ctypes_available
+    from .backends.cuda_ctypes import prepared_cuda_library_path
 
-        return cuda_ctypes_available()
-    except Exception:
-        return False
+    return prepared_cuda_library_path().is_file()
 
 
 @lru_cache(maxsize=16)
@@ -77,12 +76,17 @@ def _which_tool(name: str, path: str | None) -> str | None:
 
 
 def _metal_ctypes_available() -> bool:
-    try:
-        from .backends.metal_ctypes import metal_ctypes_available
+    from .native_cache import native_cache_dir
 
-        return metal_ctypes_available()
-    except Exception:
-        return False
+    return any(native_cache_dir().glob("_ebeamtime_metal_area-*.dylib"))
+
+
+def resolve_nvcc_path() -> str | None:
+    """Reuse gdsdiff's documented CUDA toolchain inspection contract."""
+
+    from gdsdiff import inspect_cuda_toolchain
+
+    return inspect_cuda_toolchain().nvcc_path
 
 
 def _cuda_architectures_from_env() -> tuple[str, ...]:

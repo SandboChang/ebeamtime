@@ -7,6 +7,9 @@ from typing import Any
 _EXPORT_MODULES = {
     "AreaAggregation": ".backends.base",
     "Backend": ".semantics",
+    "CudaPreparationError": ".cuda_setup",
+    "CudaPreparationReport": ".cuda_setup",
+    "CudaToolchainReport": "gdsdiff",
     "__version__": "._version",
     "backend_diagnostics": ".diagnostics",
     "EbeamLayerExposure": ".config",
@@ -23,8 +26,10 @@ _EXPORT_MODULES = {
     "estimate_gds_write_time": ".api",
     "estimate_gds_write_time_from_project_config": ".api",
     "estimate_from_area": ".units",
+    "inspect_cuda_toolchain": "gdsdiff",
     "load_project_config": ".config",
     "load_project_estimate_config": ".config",
+    "prepare_cuda": ".cuda_setup",
     "validate_report_dict": ".report",
 }
 
