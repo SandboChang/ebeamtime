@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 - 2026-07-18
+
+- Present one concise, self-contained multiple-layer example with write times
+  in seconds and hours.
+- Document optional CUDA setup and backend selection in collapsed sections.
+- Promote the approved `0.1.2rc3` content without runtime behavior changes.
+
 ## 0.1.2rc3 - 2026-07-18
 
 - Streamline the README to one self-contained multiple-layer example.
