@@ -56,3 +56,14 @@ Stable-promotion evidence on 2026-07-18:
   lock: `.venv_wsl` excludes pytest, while `.venv_wsl_test` passes the locked
   dependency check and the full suite with 47 passed and one expected Apple
   Metal hardware skip, including CUDA execution.
+- protected Trusted Publishing run `29596491385` published the same immutable
+  files to production PyPI and GitHub Release `v0.1.0`: wheel SHA-256
+  `ae54b3afeb6146e80b8efd5818d0e0a633a198fb660d71df5129dbc3cd0c0064`
+  and sdist SHA-256
+  `5c09be0be6f87575ccb5d4c32d9d70610f9b7c4c9477942418facc7c3411058e`.
+  PyPI files, GitHub assets, the immutable Actions artifact, and its checksum
+  manifest are byte-identical.
+- a fresh production-index-only scgds consumer installation resolved both
+  standalone packages from PyPI, passed dependency and installed-origin
+  checks, verified cold isolated CUDA preparation, and matched CPU/CUDA results
+  exactly for the known `2 polygons / 200 um^2 / 0.2 s` calculation.

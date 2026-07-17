@@ -10,7 +10,7 @@ green, and production publication requires `gdsdiff==0.1.0` on PyPI.
 - Hosted CI and Trusted Publishing workflows: complete; publishers and
   protected environments configured
 - TestPyPI candidate: complete
-- Production PyPI `0.1.0`: stable promotion in progress; local gate complete
+- Production PyPI `0.1.0`: complete
 
 On 2026-07-18 public tag `v0.1.0rc1` at commit `5ad2a87` passed the full
 Ubuntu/macOS/Windows Python 3.10/3.14 matrix in Actions run `29594180829`.
@@ -44,3 +44,21 @@ the production-index lock with `--no-dev` and contains no pytest installation;
 dependency check. The complete suite passed from `.venv_wsl_test` with 47
 passed and the single expected Apple Metal hardware skip; CUDA exercised the
 prepared RTX 5090 / CUDA Toolkit 13.3 backend.
+
+Protected release run `29596491385` completed after production approval. PyPI
+published wheel SHA-256
+`ae54b3afeb6146e80b8efd5818d0e0a633a198fb660d71df5129dbc3cd0c0064`
+and sdist SHA-256
+`5c09be0be6f87575ccb5d4c32d9d70610f9b7c4c9477942418facc7c3411058e`.
+The production files and public GitHub Release `v0.1.0` assets are byte-for-byte
+identical to the immutable Actions artifact, including `SHA256SUMS`; both
+manifests pass. The first local comparison glob addressed the artifact parent
+instead of its downloaded `packages/` directory, and the first manifest check
+ran one directory too high. Repeating both commands from the artifact's actual
+layout completed successfully without changing any files.
+
+A fresh production-only scgds consumer environment installed
+`ebeamtime==0.1.0` and `gdsdiff==0.1.0` from PyPI with no source checkout on
+`sys.path`, passed dependency and facade/CLI smoke checks, completed cold
+isolated CUDA preparation, and produced exact CPU/CUDA parity for the known
+`2 polygons / 200 um^2 / 0.2 s` calculation.
