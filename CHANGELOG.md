@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2rc2 - 2026-07-18
+
+- Make both README usage examples independently copyable by including their
+  own imports and absolute GDS path setup.
+
 ## 0.1.2rc1 - 2026-07-18
 
 - Add concise first-time CUDA setup and backend-selection instructions.

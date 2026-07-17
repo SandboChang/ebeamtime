@@ -42,9 +42,17 @@ print(f"Estimated write time: {report.total_s:.3f} s ({hours:.6f} h)")
 
 ## Multiple layers
 
-Using the same imports and `gds_path`, add one exposure per layer/datatype pair:
+Add one exposure per layer/datatype pair:
 
 ```python
+from pathlib import Path
+
+from ebeamtime import EbeamLayerExposure, EstimateConfig, LayerSpec
+from ebeamtime import estimate_gds_write_time
+
+# Preferred: an absolute path to the input GDS file.
+gds_path = Path("/absolute/path/to/device.gds")
+
 exposures = (
     EbeamLayerExposure(
         config_name="junction",   # Label shown in the report.
