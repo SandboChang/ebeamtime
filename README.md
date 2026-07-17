@@ -10,13 +10,17 @@ python -m pip install ebeamtime
 ebeamtime layout.gds --exposure 1:0:100:1 --backend cpu
 ```
 
-For local development before `gdsdiff` is available from the selected package
-index, install sibling checkouts explicitly without putting paths in metadata:
+For reproducible local development on WSL, synchronize the committed
+production-index lock into the platform-specific environment:
 
 ```bash
-UV_LINK_MODE=copy uv pip install --python .venv_wsl/bin/python -e ../gdsdiff -e ".[dev]"
+UV_PROJECT_ENVIRONMENT=.venv_wsl UV_LINK_MODE=copy uv sync --locked --extra test
 TMPDIR=/tmp .venv_wsl/bin/python -m pytest
 ```
+
+When qualifying coordinated unpublished changes, a sibling `gdsdiff` checkout
+may be installed editable for that local test, but it must not be recorded in
+package metadata or `uv.lock`.
 
 Python usage:
 
@@ -53,4 +57,4 @@ Apple Silicon hardware.
 `--project-config` loads and executes Python. Use it only with trusted project
 configuration files.
 
-The project is pre-release software and is licensed under GPL-3.0-only.
+The project is early-stage software and is licensed under GPL-3.0-only.

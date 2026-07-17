@@ -4,14 +4,28 @@ The authoritative sequence is shared with the sibling `gdsdiff` campaign.
 `ebeamtime` hardening and publication starts after the `gdsdiff` release gate is
 green, and production publication requires `gdsdiff==0.1.0` on PyPI.
 
-- Reproducible `uv` environment: complete locally; production lock waits for stable `gdsdiff`
+- Reproducible `uv` environment: complete with a production-index lock
 - Backend contract and CUDA preparation hardening: complete
 - Schema and installed-package qualification: complete
-- Hosted CI and Trusted Publishing workflows: complete; account configuration pending
-- TestPyPI candidate: pending external publisher setup
-- Production PyPI `0.1.0`: pending
+- Hosted CI and Trusted Publishing workflows: complete; publishers and
+  protected environments configured
+- TestPyPI candidate: complete
+- Production PyPI `0.1.0`: stable promotion in progress; local gate complete
 
-On 2026-07-18 the fully qualified `0.1.0rc1` candidate was committed locally at
-`552fd5d`. Its push remains intentionally gated on `gdsdiff==0.1.0rc1` being
-installed and verified from TestPyPI, because independent hosted CI consumes
-that published candidate rather than a sibling checkout.
+On 2026-07-18 public tag `v0.1.0rc1` at commit `5ad2a87` passed the full
+Ubuntu/macOS/Windows Python 3.10/3.14 matrix in Actions run `29594180829`.
+Trusted Publishing run `29594180909` built once, uploaded signed artifacts to
+TestPyPI, and passed a clean indexed install with the independently published
+`gdsdiff==0.1.0rc1`. The indexed wheel SHA-256 is
+`189f686bcbf646459c264135de31f2c9f50f360c163af58ad2dea2c13e3ca565`;
+the sdist SHA-256 is
+`99d9276b5f314b805b8dbbefb5592e979aeb82b32702e3c247be472b87d7f763`.
+Both files were byte-identical to the immutable GitHub workflow artifact.
+
+Stable preparation on 2026-07-18 resolved `gdsdiff==0.1.0` exclusively from
+production PyPI into the committed `uv.lock`. The synchronized WSL environment
+passed 47 tests with only the expected Apple Metal hardware skip. A fresh
+site-packages-only wheel installation pulled production `gdsdiff==0.1.0`,
+passed dependency and installed-package smoke checks, performed verified cold
+and warm CUDA preparation, and matched CPU/CUDA area and beam-time results on
+the RTX 5090. Stable tagging remains gated on hosted CI for the exact commit.

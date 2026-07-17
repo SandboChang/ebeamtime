@@ -13,7 +13,7 @@ concurrency:
 
 env:
   UV_VERSION: 0.11.29
-  GDSDIFF_CANDIDATE: 0.1.0rc1
+  GDSDIFF_RELEASE: 0.1.0
 
 jobs:
   build:
@@ -32,11 +32,9 @@ jobs:
         run: |
           package_version=$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
           test "v$package_version" = "$GITHUB_REF_NAME"
-      - run: uv venv .venv
-      - run: uv pip install --python .venv --index-url https://pypi.org/simple gdstk numpy jsonschema pytest
-      - run: uv pip install --python .venv --index-url https://test.pypi.org/simple --no-deps "gdsdiff==${{ env.GDSDIFF_CANDIDATE }}"
-      - run: uv pip install --python .venv --no-deps -e .
-      - run: uv run --no-sync python -m pytest
+      - run: uv lock --check
+      - run: uv sync --locked --extra test
+      - run: uv run --locked --extra test python -m pytest
       - run: uv build --no-sources
       - run: uvx --from twine==6.2.0 twine check --strict dist/*
       - name: Stage immutable release artifacts and hashes
@@ -87,9 +85,19 @@ jobs:
         run: |
           version=${GITHUB_REF_NAME#v}
           uv venv /tmp/ebeamtime-testpypi
-          uv pip install --python /tmp/ebeamtime-testpypi/bin/python --index-url https://pypi.org/simple gdstk numpy jsonschema
-          uv pip install --python /tmp/ebeamtime-testpypi/bin/python --index-url https://test.pypi.org/simple --no-deps "gdsdiff==$GDSDIFF_CANDIDATE"
-          uv pip install --python /tmp/ebeamtime-testpypi/bin/python --index-url https://test.pypi.org/simple --no-deps "ebeamtime==$version"
+          uv pip install --python /tmp/ebeamtime-testpypi/bin/python --index-url https://pypi.org/simple \
+            "gdsdiff==$GDSDIFF_RELEASE" gdstk numpy jsonschema
+          for attempt in 1 2 3 4 5 6; do
+            if uv pip install --python /tmp/ebeamtime-testpypi/bin/python \
+              --index-url https://test.pypi.org/simple --no-deps "ebeamtime==$version"; then
+              break
+            fi
+            if test "$attempt" -eq 6; then
+              echo "ebeamtime==$version did not become visible on TestPyPI" >&2
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
           cd /tmp
           /tmp/ebeamtime-testpypi/bin/python "$GITHUB_WORKSPACE/scripts/installed_smoke.py"
 
@@ -125,4 +133,6 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" release/packages/* release/SHA256SUMS --verify-tag --generate-notes
+        run: >-
+          gh release create "$GITHUB_REF_NAME" release/packages/* release/SHA256SUMS
+          --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0 - 2026-07-18
+
+- Promote the independently verified `0.1.0rc1` package without behavior
+  changes.
+- Require the stable standalone `gdsdiff>=0.1.0,<0.2` release.
+- Use a reproducible `uv.lock` workflow backed only by production dependencies,
+  while retaining TestPyPI solely for verification of the `ebeamtime` release
+  artifact.
+
 ## 0.1.0rc1 - 2026-07-17
 
 - Extracted `ebeamtime` from `scgds` with history and public API compatibility.

@@ -13,7 +13,6 @@ concurrency:
 
 env:
   UV_VERSION: 0.11.29
-  GDSDIFF_CANDIDATE: 0.1.0rc1
 
 jobs:
   test:
@@ -24,6 +23,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ["3.10", "3.14"]
     runs-on: ${{ matrix.os }}
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -33,11 +34,9 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
-      - run: uv venv --python ${{ matrix.python-version }} .venv
-      - run: uv pip install --python .venv --index-url https://pypi.org/simple gdstk numpy jsonschema pytest
-      - run: uv pip install --python .venv --index-url https://test.pypi.org/simple --no-deps "gdsdiff==${{ env.GDSDIFF_CANDIDATE }}"
-      - run: uv pip install --python .venv --no-deps -e .
-      - run: uv run --no-sync python -m pytest
+      - run: uv lock --check
+      - run: uv sync --locked --extra test
+      - run: uv run --locked --extra test python -m pytest
 
   package:
     timeout-minutes: 20
@@ -56,9 +55,7 @@ jobs:
         shell: bash
         run: |
           uv venv --python 3.14 /tmp/ebeamtime-wheel-smoke
-          uv pip install --python /tmp/ebeamtime-wheel-smoke/bin/python --index-url https://pypi.org/simple gdstk numpy jsonschema
-          uv pip install --python /tmp/ebeamtime-wheel-smoke/bin/python --index-url https://test.pypi.org/simple --no-deps "gdsdiff==$GDSDIFF_CANDIDATE"
-          uv pip install --python /tmp/ebeamtime-wheel-smoke/bin/python --no-deps dist/*.whl
+          uv pip install --python /tmp/ebeamtime-wheel-smoke/bin/python --index-url https://pypi.org/simple dist/*.whl gdstk jsonschema
           cd /tmp
           /tmp/ebeamtime-wheel-smoke/bin/python "$GITHUB_WORKSPACE/scripts/installed_smoke.py"
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

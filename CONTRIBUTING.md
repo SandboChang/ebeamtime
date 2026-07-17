@@ -1,16 +1,19 @@
 # Contributing
 
 Create the platform-specific repository virtual environment described in
-`AGENTS.md`, install the sibling `gdsdiff` checkout and `.[test]`, then run:
+`AGENTS.md`, then synchronize and test the committed production lock. On WSL:
 
 ```bash
-UV_LINK_MODE=copy uv pip install --python .venv_wsl/bin/python -e ../gdsdiff -e ".[dev]"
+UV_PROJECT_ENVIRONMENT=.venv_wsl UV_LINK_MODE=copy uv sync --locked --extra test
 TMPDIR=/tmp .venv_wsl/bin/python -m pytest
 ```
 
-Use the exact `uv` version required by `pyproject.toml`. A committed production
-lock follows the stable `gdsdiff` PyPI release; do not commit sibling path
-sources. Ordinary `pip` installation remains a release compatibility gate.
+Use the exact `uv` version required by `pyproject.toml`. The committed lock must
+resolve from production indexes and must not contain sibling path sources. For
+coordinated unpublished changes, an editable sibling may be installed into the
+environment explicitly for that local test, but do not record it in project
+metadata or the lock. Ordinary `pip` installation remains a release
+compatibility gate.
 
 Changes to units, extraction, stage assignment, or backends need focused
 contract tests and CPU parity evidence. Do not make GPU toolchains mandatory.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ebeamtime"
-version = "0.1.0rc1"
+version = "0.1.0"
 description = "Analytical electron-beam lithography write-time estimation from GDSII layouts"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,7 +28,7 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
 ]
 dependencies = [
-  "gdsdiff>=0.1.0rc1,<0.2",
+  "gdsdiff>=0.1.0,<0.2",
   "numpy>=1.26",
 ]
 
