@@ -28,4 +28,10 @@ passed 47 tests with only the expected Apple Metal hardware skip. A fresh
 site-packages-only wheel installation pulled production `gdsdiff==0.1.0`,
 passed dependency and installed-package smoke checks, performed verified cold
 and warm CUDA preparation, and matched CPU/CUDA area and beam-time results on
-the RTX 5090. Stable tagging remains gated on hosted CI for the exact commit.
+the RTX 5090. Hosted main CI run `29596395412` then passed the complete
+Ubuntu/macOS/Windows Python 3.10/3.14 matrix and package smoke gate on commit
+`b576653`, which was annotated as `v0.1.0`.
+The stable TestPyPI upload succeeded in run `29596491385`, but uv retained its
+first negative Simple API response during the bounded visibility loop. Future
+attempts now use `--refresh-package ebeamtime`; the already indexed stable
+artifact will be verified on a fresh rerun before production approval.

@@ -89,7 +89,8 @@ jobs:
             "gdsdiff==$GDSDIFF_RELEASE" gdstk numpy jsonschema
           for attempt in 1 2 3 4 5 6; do
             if uv pip install --python /tmp/ebeamtime-testpypi/bin/python \
-              --index-url https://test.pypi.org/simple --no-deps "ebeamtime==$version"; then
+              --index-url https://test.pypi.org/simple --refresh-package ebeamtime \
+              --no-deps "ebeamtime==$version"; then
               break
             fi
             if test "$attempt" -eq 6; then
