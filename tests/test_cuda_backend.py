@@ -3,9 +3,42 @@ from __future__ import annotations
 import gdstk
 import pytest
 
+import ebeamtime.native as native_module
 from ebeamtime.api import estimate_gds_write_time
 from ebeamtime.config import EbeamLayerExposure, EstimateConfig, LayerSpec
-from ebeamtime.native import discover_native_capabilities
+from ebeamtime.native import CUDA_ARCH_ENV, LEGACY_CUDA_ARCH_ENV, discover_native_capabilities, nvcc_architecture_flags
+
+
+def test_cuda_architecture_configuration_generates_native_sass(monkeypatch):
+    monkeypatch.setenv(CUDA_ARCH_ENV, "89;120")
+    assert discover_native_capabilities().cuda_architectures == ("89", "120")
+    assert nvcc_architecture_flags() == (
+        "--generate-code=arch=compute_89,code=sm_89",
+        "--generate-code=arch=compute_120,code=sm_120",
+    )
+
+
+def test_default_cuda_architecture_is_native(monkeypatch):
+    monkeypatch.delenv(CUDA_ARCH_ENV, raising=False)
+    monkeypatch.delenv(LEGACY_CUDA_ARCH_ENV, raising=False)
+
+    assert nvcc_architecture_flags() == ("-arch=native",)
+
+
+def test_tool_lookup_cache_tracks_path_changes(monkeypatch):
+    calls = []
+
+    def fake_which(name, *, path=None):
+        calls.append((name, path))
+        return f"{path}/{name}" if path == "with-tools" else None
+
+    native_module._which_tool.cache_clear()
+    monkeypatch.setattr(native_module.shutil, "which", fake_which)
+    assert native_module._which_tool("nvcc", "without-tools") is None
+    assert native_module._which_tool("nvcc", "with-tools") == "with-tools/nvcc"
+    assert native_module._which_tool("nvcc", "with-tools") == "with-tools/nvcc"
+    assert calls == [("nvcc", "without-tools"), ("nvcc", "with-tools")]
+    native_module._which_tool.cache_clear()
 
 
 def test_cuda_backend_matches_cpu_when_available(tmp_path):

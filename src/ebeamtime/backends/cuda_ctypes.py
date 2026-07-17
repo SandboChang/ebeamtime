@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import ctypes
+import os
 import subprocess
+from functools import lru_cache
 from pathlib import Path
 from time import perf_counter
 
 import numpy as np
 
+from ..native import nvcc_architecture_flags
 from ..native_cache import ensure_cached_native_library
 from .base import AreaAggregation
 
@@ -84,14 +87,26 @@ def run_cuda_area_aggregation(buffer, exposure_ids: np.ndarray, exposure_count: 
     )
 
 
+@lru_cache(maxsize=1)
 def _load_library() -> ctypes.CDLL:
     source = _source_path()
+    architecture_flags = nvcc_architecture_flags()
     if not source.exists():
         raise CudaCtypesUnavailable(f"CUDA source not found: {source}")
     path = ensure_cached_native_library(
         "_ebeamtime_cuda_area.so",
         sources=(source,),
-        build_key=("nvcc", "-O3", "-std=c++17", "--shared", "-Xcompiler", "-fPIC"),
+        build_key=(
+            "nvcc",
+            "-O3",
+            "-std=c++17",
+            "--shared",
+            "-Xcompiler",
+            "-fPIC",
+            *architecture_flags,
+            f"NVCC_PREPEND_FLAGS={os.environ.get('NVCC_PREPEND_FLAGS', '')}",
+            f"NVCC_APPEND_FLAGS={os.environ.get('NVCC_APPEND_FLAGS', '')}",
+        ),
         builder=_build_library,
     )
     try:
@@ -121,6 +136,7 @@ def _load_library() -> ctypes.CDLL:
 
 def _build_library(path: Path) -> None:
     source = _source_path()
+    architecture_flags = nvcc_architecture_flags()
     path.parent.mkdir(parents=True, exist_ok=True)
     command = [
         "nvcc",
@@ -129,6 +145,7 @@ def _build_library(path: Path) -> None:
         "--shared",
         "-Xcompiler",
         "-fPIC",
+        *architecture_flags,
         str(source),
         "-o",
         str(path),

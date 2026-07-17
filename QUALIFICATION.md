@@ -2,7 +2,8 @@
 
 Qualified on 2026-07-17 under Windows 11 WSL, Linux x86_64, CPython 3.14:
 
-- focused standalone suite: 37 passed, 1 expected CUDA capability skip;
+- CUDA-enabled standalone suite: 41 passed with no skips or failures;
+- CPU-only standalone suite: 40 passed with one expected CUDA capability skip;
 - all 17 legacy `scgds.ebeamtime` root exports and signatures preserved after
   namespace and development-version normalization; 21 root exports total;
 - CLI help byte-for-byte equal to the extraction baseline;
@@ -10,6 +11,13 @@ Qualified on 2026-07-17 under Windows 11 WSL, Linux x86_64, CPython 3.14:
   paths, timings, tool version, and the intentionally added schema version;
 - `ExtractionResult.buffer` identity proven unchanged into area aggregation;
 - CPU seven-run median: 0.022923 s versus 0.024427 s baseline (6.2% faster);
+- CUDA correctness: CPU/CUDA area and beam-time parity passed on an NVIDIA
+  GeForce RTX 5090 (compute capability 12.0) through WSL2 with Windows display
+  driver 596.36, CUDA Toolkit 13.3.1, and nvcc 13.3.73. The default
+  `-arch=native` build emitted native SASS without manual nvcc flags;
+- CUDA warm-path performance on an identical 500-polygon estimate after one
+  warm-up: 0.009390 s standalone versus 0.009338 s embedded across seven-run
+  medians (+0.56%, within the 5% parity gate);
 - peak RSS across 21 isolated representative estimation processes: 31,964 KiB
   versus 32,032 KiB embedded (-0.212%); installed report versions remain
   metadata-derived without eagerly importing Python's full distribution
@@ -21,7 +29,5 @@ Qualified on 2026-07-17 under Windows 11 WSL, Linux x86_64, CPython 3.14:
   `ebeamtime` wheels, passed `pip check`, root imports, CLI help, diagnostics,
   and the unit formula without either source checkout on `sys.path`.
 
-The local NVIDIA RTX 5090 is visible, but `nvcc` is not installed, so the real
-CUDA correctness/performance gate remains mandatory before a public release.
-Real Apple Metal validation also remains outstanding and is nonblocking for the
+Real Apple Metal validation remains outstanding and is nonblocking for the
 private extraction milestone.

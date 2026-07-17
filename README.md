@@ -35,5 +35,10 @@ print(report.total_s)
 CUDA and Apple Metal are runtime options. They require compatible hardware and
 the platform toolchain (`nvcc` or Xcode command-line tools); CPU requires
 neither. See `ebeamtime-diagnostics` and `docs/semantics.md`.
+On-demand builds default to NVIDIA's `-arch=native`, which detects visible GPUs
+and emits native SASS without PTX. For cross-machine builds, set
+`EBEAMTIME_CUDA_ARCHITECTURES` to comma-separated compute capabilities without
+decimals (for example, `89,120`); targets and standard `NVCC_*_FLAGS` become
+part of the content-addressed cache key.
 
 The project is pre-release software and is licensed under GPL-3.0-only.

@@ -3,6 +3,7 @@ from __future__ import annotations
 import ctypes
 import platform
 import subprocess
+from functools import lru_cache
 from pathlib import Path
 from time import perf_counter
 
@@ -75,6 +76,7 @@ def run_metal_area_aggregation(buffer, exposure_ids: np.ndarray, exposure_count:
     )
 
 
+@lru_cache(maxsize=1)
 def _load_library() -> ctypes.CDLL:
     source = _source_path()
     if not source.exists():
