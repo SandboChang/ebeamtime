@@ -1,6 +1,7 @@
 .venv/
 .venv_mac/
 .venv_wsl/
+.venv_wsl_test/
 __pycache__/
 *.py[cod]
 *.egg-info/

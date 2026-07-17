@@ -32,6 +32,15 @@ the RTX 5090. Hosted main CI run `29596395412` then passed the complete
 Ubuntu/macOS/Windows Python 3.10/3.14 matrix and package smoke gate on commit
 `b576653`, which was annotated as `v0.1.0`.
 The stable TestPyPI upload succeeded in run `29596491385`, but uv retained its
-first negative Simple API response during the bounded visibility loop. Future
-attempts now use `--refresh-package ebeamtime`; the already indexed stable
-artifact will be verified on a fresh rerun before production approval.
+first negative Simple API response during the bounded visibility loop. The
+workflow now uses `--refresh-package ebeamtime`; a fresh rerun verified the
+indexed artifact successfully, and the production job is waiting at its
+protected approval gate.
+
+WSL environment isolation was requalified on 2026-07-18 after separating the
+clean runtime environment from test tooling. `.venv_wsl` was recreated from
+the production-index lock with `--no-dev` and contains no pytest installation;
+`.venv_wsl_test` was recreated with the test extra and passes the locked
+dependency check. The complete suite passed from `.venv_wsl_test` with 47
+passed and the single expected Apple Metal hardware skip; CUDA exercised the
+prepared RTX 5090 / CUDA Toolkit 13.3 backend.

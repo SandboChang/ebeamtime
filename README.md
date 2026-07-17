@@ -14,9 +14,13 @@ For reproducible local development on WSL, synchronize the committed
 production-index lock into the platform-specific environment:
 
 ```bash
-UV_PROJECT_ENVIRONMENT=.venv_wsl UV_LINK_MODE=copy uv sync --locked --extra test
-TMPDIR=/tmp .venv_wsl/bin/python -m pytest
+UV_PROJECT_ENVIRONMENT=.venv_wsl UV_LINK_MODE=copy uv sync --locked --no-dev
+UV_PROJECT_ENVIRONMENT=.venv_wsl_test UV_LINK_MODE=copy uv sync --locked --extra test
+TMPDIR=/tmp .venv_wsl_test/bin/python -m pytest
 ```
+
+On WSL, `.venv_wsl` remains the clean runtime environment and all test tooling
+lives in `.venv_wsl_test`.
 
 When qualifying coordinated unpublished changes, a sibling `gdsdiff` checkout
 may be installed editable for that local test, but it must not be recorded in

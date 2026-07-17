@@ -52,3 +52,7 @@ Stable-promotion evidence on 2026-07-18:
 - the fresh installed wheel passed verified cold and warm CUDA preparation and
   exact CPU/CUDA area and beam-time parity on the same RTX 5090/CUDA 13.3
   platform.
+- the WSL runtime and test environments were recreated independently from the
+  lock: `.venv_wsl` excludes pytest, while `.venv_wsl_test` passes the locked
+  dependency check and the full suite with 47 passed and one expected Apple
+  Metal hardware skip, including CUDA execution.

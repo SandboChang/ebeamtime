@@ -6,15 +6,17 @@ under `tests/`.
 
 ## Environment
 
-- Use `.venv_wsl/bin/python` on Windows 11 through WSL, `.venv_mac/bin/python`
-  on macOS, and `.venv/bin/python` on native Linux.
+- Use `.venv_wsl/bin/python` for normal imports and runtime development on
+  Windows 11 through WSL, and `.venv_wsl_test/bin/python` for every test run.
+  Use `.venv_mac/bin/python` on macOS and `.venv/bin/python` on native Linux.
 - Keep the CPU path usable without CUDA, Metal, a compiler, or a GPU.
 - CUDA and Metal are exposed optional runtime capabilities, not installation
   dependencies. A requested or required unavailable GPU backend must fail
   clearly; `auto` may fall back to CPU.
 - Use the exact `uv` version required by `pyproject.toml`. On WSL under
-  `/mnt/f`, use `UV_LINK_MODE=copy`, target `.venv_wsl`, and set `TMPDIR=/tmp`
-  for pytest. Do not commit a sibling path source for `gdsdiff`.
+  `/mnt/f`, keep `.venv_wsl` synchronized without test extras, target
+  `.venv_wsl_test` with test extras, use `UV_LINK_MODE=copy`, and set
+  `TMPDIR=/tmp` for pytest. Do not commit a sibling path source for `gdsdiff`.
 
 ## Development Rules
 
