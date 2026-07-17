@@ -10,3 +10,8 @@ green, and production publication requires `gdsdiff==0.1.0` on PyPI.
 - Hosted CI and Trusted Publishing workflows: complete; account configuration pending
 - TestPyPI candidate: pending external publisher setup
 - Production PyPI `0.1.0`: pending
+
+On 2026-07-18 the fully qualified `0.1.0rc1` candidate was committed locally at
+`552fd5d`. Its push remains intentionally gated on `gdsdiff==0.1.0rc1` being
+installed and verified from TestPyPI, because independent hosted CI consumes
+that published candidate rather than a sibling checkout.
