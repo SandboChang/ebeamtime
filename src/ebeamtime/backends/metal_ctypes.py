@@ -8,7 +8,7 @@ from time import perf_counter
 
 import numpy as np
 
-from ..native_cache import cached_native_library_path
+from ..native_cache import ensure_cached_native_library
 from .base import AreaAggregation
 
 
@@ -76,12 +76,15 @@ def run_metal_area_aggregation(buffer, exposure_ids: np.ndarray, exposure_count:
 
 
 def _load_library() -> ctypes.CDLL:
-    path = _library_path()
     source = _source_path()
     if not source.exists():
         raise MetalCtypesUnavailable(f"Metal source not found: {source}")
-    if not path.exists() or source.stat().st_mtime > path.stat().st_mtime:
-        _build_library(path)
+    path = ensure_cached_native_library(
+        "_ebeamtime_metal_area.dylib",
+        sources=(source,),
+        build_key=("clang++", "-std=c++17", "-O3", "-dynamiclib", "-fobjc-arc", "Metal"),
+        builder=_build_library,
+    )
     try:
         library = ctypes.CDLL(str(path))
     except OSError as exc:
@@ -139,10 +142,6 @@ def _xcrun_value(*args: str) -> str:
     if completed.returncode != 0:
         raise MetalCtypesUnavailable((completed.stderr or completed.stdout).strip() or "xcrun failed")
     return completed.stdout.strip()
-
-
-def _library_path() -> Path:
-    return cached_native_library_path("_ebeamtime_metal_area.dylib")
 
 
 def _source_path() -> Path:
