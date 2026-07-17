@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 
 def beam_on_seconds(area_um2: float, dose_uC_cm2: float, beam_current_nA: float) -> float:
     """Return beam-on exposure time for area, dose, and beam current.
@@ -9,11 +11,11 @@ def beam_on_seconds(area_um2: float, dose_uC_cm2: float, beam_current_nA: float)
     therefore seconds = area_um2 * dose_uC_cm2 * 1e-5 / beam_current_nA.
     """
 
-    if area_um2 < 0:
+    if not math.isfinite(area_um2) or area_um2 < 0:
         raise ValueError("area_um2 must be nonnegative")
-    if dose_uC_cm2 <= 0:
+    if not math.isfinite(dose_uC_cm2) or dose_uC_cm2 <= 0:
         raise ValueError("dose_uC_cm2 must be positive")
-    if beam_current_nA <= 0:
+    if not math.isfinite(beam_current_nA) or beam_current_nA <= 0:
         raise ValueError("beam_current_nA must be positive")
     return float(area_um2) * float(dose_uC_cm2) * 1e-5 / float(beam_current_nA)
 

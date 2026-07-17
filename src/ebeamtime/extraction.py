@@ -6,8 +6,8 @@ from pathlib import Path
 
 import numpy as np
 
-from scgds.gdsdiff.extract import extract_gds_polygons
-from scgds.gdsdiff.gds_metadata import read_gds_metadata
+from gdsdiff import extract_gds_polygons
+from gdsdiff import read_gds_metadata
 
 from .config import EstimateConfig, LayerSpec
 

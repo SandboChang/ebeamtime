@@ -4,7 +4,7 @@ import textwrap
 
 import pytest
 
-from scgds.ebeamtime.config import LayerSpec, load_project_estimate_config
+from ebeamtime.config import LayerSpec, load_project_estimate_config
 
 
 def _write_config(tmp_path, body: str):

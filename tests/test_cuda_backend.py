@@ -3,9 +3,9 @@ from __future__ import annotations
 import gdstk
 import pytest
 
-from scgds.ebeamtime.api import estimate_gds_write_time
-from scgds.ebeamtime.config import EbeamLayerExposure, EstimateConfig, LayerSpec
-from scgds.ebeamtime.native import discover_native_capabilities
+from ebeamtime.api import estimate_gds_write_time
+from ebeamtime.config import EbeamLayerExposure, EstimateConfig, LayerSpec
+from ebeamtime.native import discover_native_capabilities
 
 
 def test_cuda_backend_matches_cpu_when_available(tmp_path):

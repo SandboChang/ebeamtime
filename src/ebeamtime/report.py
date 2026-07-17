@@ -3,10 +3,13 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
+from ._version import __version__
 from .config import EbeamLayerExposure, LayerSpec
 
-TOOL_VERSION = "0.1.0"
+REPORT_SCHEMA_VERSION = "ebeamtime-report-v1"
+TOOL_VERSION = __version__
 
 
 def hours_from_seconds(seconds: float) -> float:
@@ -126,6 +129,7 @@ class EstimateReport:
             backend["details"] = add_duration_unit_fields(details)
         return {
             "tool": "ebeamtime",
+            "schema_version": REPORT_SCHEMA_VERSION,
             "tool_version": self.tool_version,
             "path": str(self.path),
             "top_name": self.top_name,
@@ -150,8 +154,30 @@ class EstimateReport:
     def write_json(self, path: str | Path) -> Path:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(self.to_json_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        report = self.to_json_dict()
+        validate_report_dict(report)
+        path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return path
+
+
+def validate_report_dict(report: dict[str, Any]) -> None:
+    required = {
+        "tool", "schema_version", "tool_version", "path", "top_name", "backend",
+        "beam_voltage_kV", "notes", "total_beam_on_s", "total_beam_on_hr",
+        "total_beam_on_days", "total_stage_s", "total_stage_hr", "total_stage_days",
+        "total_s", "total_hr", "total_days", "layers", "stage", "extraction", "timings",
+    }
+    missing = sorted(required - set(report))
+    if missing:
+        raise ValueError(f"report missing required fields: {', '.join(missing)}")
+    if report["tool"] != "ebeamtime":
+        raise ValueError("report tool must be ebeamtime")
+    if report["schema_version"] != REPORT_SCHEMA_VERSION:
+        raise ValueError("unsupported report schema_version")
+    if not isinstance(report["layers"], list):
+        raise ValueError("layers must be a list")
+    if not isinstance(report["backend"], dict) or not isinstance(report["stage"], dict):
+        raise ValueError("backend and stage must be objects")
 
 
 def layer_estimate_from_area(

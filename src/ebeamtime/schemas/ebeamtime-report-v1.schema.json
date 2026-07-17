@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ebeamtime-report-v1.schema.json",
+  "title": "ebeamtime report v1",
+  "type": "object",
+  "required": [
+    "tool", "schema_version", "tool_version", "path", "top_name", "backend",
+    "layers", "stage", "extraction", "timings", "total_s"
+  ],
+  "properties": {
+    "tool": {"const": "ebeamtime"},
+    "schema_version": {"const": "ebeamtime-report-v1"},
+    "tool_version": {"type": "string"},
+    "path": {"type": "string"},
+    "top_name": {"type": "string"},
+    "backend": {"type": "object"},
+    "layers": {"type": "array"},
+    "stage": {"type": "object"},
+    "extraction": {"type": "object"},
+    "timings": {"type": "object"},
+    "total_s": {"type": "number"}
+  }
+}

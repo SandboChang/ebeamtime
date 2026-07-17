@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from scgds.ebeamtime.units import beam_on_seconds
+from ebeamtime.units import beam_on_seconds
 
 
 def test_beam_on_formula_lab_units():
@@ -15,6 +15,9 @@ def test_beam_on_formula_lab_units():
         (-1, 100, 1),
         (1, 0, 1),
         (1, 100, 0),
+        (float("nan"), 100, 1),
+        (1, float("inf"), 1),
+        (1, 100, float("nan")),
     ],
 )
 def test_beam_on_formula_rejects_invalid_values(area, dose, current):

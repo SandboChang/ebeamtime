@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
+import math
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from types import ModuleType
@@ -55,9 +56,9 @@ class EbeamLayerExposure:
     def __post_init__(self) -> None:
         if not self.config_name:
             raise ValueError("config_name cannot be empty")
-        if self.dose_uC_cm2 <= 0:
+        if not math.isfinite(self.dose_uC_cm2) or self.dose_uC_cm2 <= 0:
             raise ValueError(f"{self.config_name} dose_uC_cm2 must be positive")
-        if self.beam_current_nA <= 0:
+        if not math.isfinite(self.beam_current_nA) or self.beam_current_nA <= 0:
             raise ValueError(f"{self.config_name} beam_current_nA must be positive")
 
     def to_json(self) -> dict[str, object]:
@@ -99,14 +100,14 @@ class EstimateConfig:
         object.__setattr__(self, "exposures", exposures)
         if self.max_write_field_um is not None:
             width, height = self.max_write_field_um
-            if width <= 0 or height <= 0:
+            if not math.isfinite(width) or not math.isfinite(height) or width <= 0 or height <= 0:
                 raise ValueError("max_write_field_um values must be positive")
             object.__setattr__(self, "max_write_field_um", (float(width), float(height)))
-        if self.stage_speed_mm_s is not None and self.stage_speed_mm_s <= 0:
+        if self.stage_speed_mm_s is not None and (not math.isfinite(self.stage_speed_mm_s) or self.stage_speed_mm_s <= 0):
             raise ValueError("stage_speed_mm_s must be positive when supplied")
-        if self.stage_settle_s < 0:
+        if not math.isfinite(self.stage_settle_s) or self.stage_settle_s < 0:
             raise ValueError("stage_settle_s must be nonnegative")
-        if self.beam_voltage_kV is not None and self.beam_voltage_kV <= 0:
+        if self.beam_voltage_kV is not None and (not math.isfinite(self.beam_voltage_kV) or self.beam_voltage_kV <= 0):
             raise ValueError("beam_voltage_kV must be positive when supplied")
         if self.gpu_min_polygons < 0:
             raise ValueError("gpu_min_polygons must be nonnegative")
@@ -169,7 +170,7 @@ def load_project_config(value: str | Path | ModuleType) -> ModuleType:
     raw = str(value)
     path = Path(raw)
     if path.exists():
-        module_name = f"_scgds_ebeamtime_config_{abs(hash(path.resolve()))}"
+        module_name = f"_ebeamtime_config_{abs(hash(path.resolve()))}"
         spec = importlib.util.spec_from_file_location(module_name, path)
         if spec is None or spec.loader is None:
             raise ValueError(f"cannot import project config from {path}")
@@ -286,7 +287,7 @@ def _load_exposures_from_module(module: ModuleType) -> tuple[EbeamLayerExposure,
 
 def _positive_float(value: object, context: str) -> float:
     result = float(value)
-    if result <= 0:
+    if not math.isfinite(result) or result <= 0:
         raise ValueError(f"{context} must be positive")
     return result
 

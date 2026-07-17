@@ -1,0 +1,17 @@
+.venv/
+.venv_mac/
+.venv_wsl/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+.tmp/
+results/
+.dump/
+*.gds
+*.oas
+.DS_Store
+.idea/
+.vscode/

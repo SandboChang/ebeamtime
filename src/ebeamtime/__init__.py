@@ -5,7 +5,10 @@ from importlib import import_module
 from typing import Any
 
 _EXPORT_MODULES = {
+    "AreaAggregation": ".backends.base",
     "Backend": ".semantics",
+    "__version__": "._version",
+    "backend_diagnostics": ".diagnostics",
     "EbeamLayerExposure": ".config",
     "EstimateConfig": ".config",
     "EstimateRunResult": ".api",
@@ -22,6 +25,7 @@ _EXPORT_MODULES = {
     "estimate_from_area": ".units",
     "load_project_config": ".config",
     "load_project_estimate_config": ".config",
+    "validate_report_dict": ".report",
 }
 
 __all__ = sorted(_EXPORT_MODULES)

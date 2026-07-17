@@ -8,8 +8,8 @@ import textwrap
 import gdstk
 import pytest
 
-from scgds.ebeamtime.api import estimate_gds_write_time
-from scgds.ebeamtime.config import EbeamLayerExposure, EstimateConfig, LayerSpec
+from ebeamtime.api import estimate_gds_write_time
+from ebeamtime.config import EbeamLayerExposure, EstimateConfig, LayerSpec
 
 
 def _write_gds(path, cell):
@@ -149,7 +149,7 @@ def test_cli_table_and_json_report(tmp_path):
         [
             sys.executable,
             "-m",
-            "scgds.ebeamtime",
+            "ebeamtime",
             str(gds_path),
             "--project-config",
             str(config_path),
@@ -186,7 +186,7 @@ def test_backend_auto_falls_back_to_cpu_for_small_layout(tmp_path, monkeypatch):
         cuda_available = True
         metal_available = False
 
-    import scgds.ebeamtime.api as api_module
+    import ebeamtime.api as api_module
 
     monkeypatch.setattr(api_module, "discover_native_capabilities", lambda: Capabilities())
     result = estimate_gds_write_time(_config(path, backend="auto", gpu_min_polygons=999))
