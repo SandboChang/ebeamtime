@@ -9,39 +9,10 @@ area, exposure dose, and beam current in a GDSII file.
 python -m pip install ebeamtime
 ```
 
-## One layer
+## Example
 
 An absolute GDS path is preferred. A relative path such as
 `Path("layouts/device.gds")` starts at the directory where you run Python.
-
-```python
-from pathlib import Path
-
-from ebeamtime import EbeamLayerExposure, EstimateConfig, LayerSpec
-from ebeamtime import estimate_gds_write_time
-
-# Preferred: an absolute path to the input GDS file.
-gds_path = Path("/absolute/path/to/device.gds")
-
-junction = EbeamLayerExposure(
-    config_name="junction",       # Label shown in the report.
-    layer=LayerSpec(1, 0),        # GDS layer 1, datatype 0.
-    dose_uC_cm2=700,              # Dose (µC/cm²).
-    beam_current_nA=1,            # Beam current (nA).
-)
-
-config = EstimateConfig(
-    gds_path=gds_path,            # GDSII file to analyse.
-    exposures=(junction,),        # Keep the comma: this is a one-item tuple.
-)
-
-report = estimate_gds_write_time(config).report
-hours = report.total_s / 3600
-print(f"Estimated write time: {report.total_s:.3f} s ({hours:.6f} h)")
-```
-
-## Multiple layers
-
 Add one exposure per layer/datatype pair:
 
 ```python

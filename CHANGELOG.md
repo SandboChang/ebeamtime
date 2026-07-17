@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2rc3 - 2026-07-18
+
+- Streamline the README to one self-contained multiple-layer example.
+
 ## 0.1.2rc2 - 2026-07-18
 
 - Make both README usage examples independently copyable by including their
