@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 - 2026-07-18
+
+- Replace the project page with concise, commented single-layer and
+  multiple-layer examples.
+- Clarify absolute and working-directory-relative GDS paths.
+
 ## 0.1.0 - 2026-07-18
 
 - Promote the independently verified `0.1.0rc1` package without behavior
