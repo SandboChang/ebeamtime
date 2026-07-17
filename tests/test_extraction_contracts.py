@@ -4,6 +4,7 @@ import importlib
 import json
 import math
 import sys
+from importlib.metadata import version
 from types import ModuleType
 
 import gdstk
@@ -12,6 +13,7 @@ import pytest
 
 import ebeamtime.api as api_module
 from ebeamtime import (
+    __version__,
     EbeamLayerExposure,
     EstimateConfig,
     LayerSpec,
@@ -163,3 +165,7 @@ def test_report_schema_and_cpu_safe_diagnostics(tmp_path):
     diagnostics = backend_diagnostics()
     assert diagnostics["capabilities"]["cpu_available"] is True
     assert diagnostics["native_cache"]["environment"] == "EBEAMTIME_NATIVE_CACHE_DIR"
+
+
+def test_report_version_matches_installed_distribution():
+    assert __version__ == version("ebeamtime")

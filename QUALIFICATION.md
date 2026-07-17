@@ -2,7 +2,7 @@
 
 Qualified on 2026-07-17 under Windows 11 WSL, Linux x86_64, CPython 3.14:
 
-- focused standalone suite: 36 passed, 1 expected CUDA capability skip;
+- focused standalone suite: 37 passed, 1 expected CUDA capability skip;
 - all 17 legacy `scgds.ebeamtime` root exports and signatures preserved after
   namespace and development-version normalization; 21 root exports total;
 - CLI help byte-for-byte equal to the extraction baseline;
@@ -10,6 +10,10 @@ Qualified on 2026-07-17 under Windows 11 WSL, Linux x86_64, CPython 3.14:
   paths, timings, tool version, and the intentionally added schema version;
 - `ExtractionResult.buffer` identity proven unchanged into area aggregation;
 - CPU seven-run median: 0.022923 s versus 0.024427 s baseline (6.2% faster);
+- peak RSS across 21 isolated representative estimation processes: 31,964 KiB
+  versus 32,032 KiB embedded (-0.212%); installed report versions remain
+  metadata-derived without eagerly importing Python's full distribution
+  metadata stack;
 - sdist and wheel passed `twine check`; wheel contains the report schema,
   typing marker, CUDA source, and Metal source, with no tests or `scgds` tree;
 - wheel metadata contains only abstract dependencies and no local paths;
